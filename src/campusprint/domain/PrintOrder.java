@@ -45,7 +45,7 @@ public final class PrintOrder {
 
     @Override
     public String toString() {
-        return "#%d %s | %d copies | %d pages | %s".formatted(
+        return "#%d %s | copies: %d | pages: %d | %s".formatted(
                 id, job.documentName(), job.copies(), printedPages(), LineItem.formatTenge(totalCost()));
     }
 }
