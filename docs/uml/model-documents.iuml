@@ -1,0 +1,60 @@
+package "Entry point" as EntrypointGroup {
+    class Main {
+        {static} + main(String[]) : void
+        {static} - acceptThesis(PrintCenter) : PrintOrder
+        {static} - application(int) : PrintJob
+        {static} - runPrintDesk() : void
+        {static} - compareVolume(PrintJob) : void
+        {static} - showPreview(PrintCenter) : void
+    }
+}
+
+package "Bridge" as BridgeGroup {
+    abstract class OrderDocument {
+        - renderer : DocumentRenderer
+        # OrderDocument(DocumentRenderer)
+        {abstract} # title(PrintOrder) : String
+        {abstract} # fields(PrintOrder) : List<DocumentField>
+        + render(PrintOrder) : String
+    }
+
+    class Receipt {
+        + Receipt(DocumentRenderer)
+        # title(PrintOrder) : String
+        # fields(PrintOrder) : List<DocumentField>
+    }
+
+    class JobTicket {
+        + JobTicket(DocumentRenderer)
+        # title(PrintOrder) : String
+        # fields(PrintOrder) : List<DocumentField>
+    }
+
+    interface DocumentRenderer <<interface>> {
+        + render(String, List<DocumentField>) : String
+    }
+
+    class PlainTextRenderer {
+        + render(String, List<DocumentField>) : String
+    }
+
+    class MarkdownRenderer {
+        + render(String, List<DocumentField>) : String
+        {static} - escape(String) : String
+    }
+
+    class DocumentField <<record>> {
+        - label : String
+        - value : String
+        + DocumentField(String, String)
+        + label() : String
+        + value() : String
+    }
+}
+
+Receipt --|> OrderDocument
+JobTicket --|> OrderDocument
+OrderDocument --> "1" DocumentRenderer : renderer
+PlainTextRenderer ..|> DocumentRenderer
+MarkdownRenderer ..|> DocumentRenderer
+DocumentRenderer ..> DocumentField

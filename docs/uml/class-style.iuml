@@ -3,10 +3,11 @@ hide circle
 skinparam backgroundColor transparent
 skinparam defaultFontName Arial
 skinparam defaultFontSize 13
-skinparam defaultFontColor #1A3440
+skinparam defaultFontColor #161616
 skinparam shadowing false
+skinparam monochrome true
 skinparam classBackgroundColor #FFFFFF
-skinparam classBorderColor #74909A
-skinparam arrowColor #546C78
+skinparam classBorderColor #555555
+skinparam arrowColor #555555
 skinparam nodesep 12
 skinparam ranksep 14

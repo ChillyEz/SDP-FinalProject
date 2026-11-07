@@ -1,0 +1,18 @@
+skinparam monochrome true
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundCorner 0
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam classAttributeFontSize 12
+skinparam classAttributeIconSize 0
+skinparam classBackgroundColor white
+skinparam classBorderColor #444444
+skinparam packageStyle rectangle
+skinparam packageBackgroundColor #FAFAFA
+skinparam packageBorderColor #888888
+skinparam arrowColor #444444
+skinparam nodesep 24
+skinparam ranksep 30
+hide circle
+hide empty members

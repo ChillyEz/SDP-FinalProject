@@ -2,22 +2,23 @@
 !pragma layout smetana
 skinparam backgroundColor #FFFFFF
 skinparam shadowing false
+skinparam monochrome true
 skinparam defaultFontName Arial
 skinparam defaultFontSize 14
-skinparam defaultFontColor #172B36
-skinparam arrowColor #536976
+skinparam defaultFontColor #161616
+skinparam arrowColor #555555
 skinparam classBackgroundColor #FFFFFF
-skinparam classBorderColor #69808A
+skinparam classBorderColor #555555
 skinparam classAttributeIconSize 0
 skinparam packageStyle rectangle
 skinparam packageFontStyle bold
-skinparam packageBorderColor #92A8AE
-skinparam roundCorner 7
+skinparam packageBorderColor #555555
+skinparam roundCorner 0
 hide circle
 hide empty members
 skinparam nodesep 26
 skinparam ranksep 26
-package "Document content" #F1EDF8 {
+package "Document content" #F5F5F5 {
     abstract class OrderDocument {
         +render(order) : String
         {abstract} #title(order) : String
@@ -28,7 +29,7 @@ package "Document content" #F1EDF8 {
     OrderDocument <|-- Receipt
     OrderDocument <|-- JobTicket
 }
-package "Output format" #E1F2EE {
+package "Output format" #F5F5F5 {
     interface DocumentRenderer {
         +render(title, fields) : String
     }

@@ -1,22 +1,23 @@
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam shadowing false
+skinparam monochrome true
 skinparam defaultFontName Arial
 skinparam defaultFontSize 14
-skinparam defaultFontColor #172B36
-skinparam sequenceArrowColor #355D66
-skinparam sequenceLifeLineBorderColor #96A9AD
-skinparam sequenceParticipantBorderColor #648089
-skinparam sequenceGroupBorderColor #A8B9BD
-skinparam sequenceGroupBackgroundColor #F0F5F4
-skinparam sequenceGroupHeaderFontColor #25464A
+skinparam defaultFontColor #161616
+skinparam sequenceArrowColor #555555
+skinparam sequenceLifeLineBorderColor #555555
+skinparam sequenceParticipantBorderColor #555555
+skinparam sequenceGroupBorderColor #555555
+skinparam sequenceGroupBackgroundColor #EEEEEE
+skinparam sequenceGroupHeaderFontColor #161616
 skinparam ParticipantPadding 12
 hide footbox
 actor Operator
-participant "PrintCenter" as Center #E1F2EE
-participant "QueuePolicy" as Policy #ECF0FC
-participant "ConsolePrinter" as Printer #E1F2EE
-participant "PrintSubscriber" as Subscriber #F8EFE5
+participant "PrintCenter" as Center #F5F5F5
+participant "QueuePolicy" as Policy #F5F5F5
+participant "ConsolePrinter" as Printer #F5F5F5
+participant "PrintSubscriber" as Subscriber #F5F5F5
 
 Operator -> Center : printNext()
 Center -> Policy : selectNext(pendingOrders)
@@ -27,7 +28,7 @@ else order selected
     Center -> Printer : print(order)
     alt paper jam
         Printer --> Center : IllegalStateException
-        Center --> Operator : propagate error; order stays pending
+        Center --> Operator : return error (order stays pending)
     else print succeeds
         Printer --> Center : return
         Center -> Center : remove order from queue

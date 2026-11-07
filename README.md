@@ -50,7 +50,7 @@ The [project specification](PROJECT_PLAN.md) gives the business rules. The [repo
 
 ## Report and UML
 
-Open the [full class overview](docs/uml/architecture.svg), [document class diagram](docs/uml/document-bridge.svg) or [print sequence](docs/uml/print-next.svg) in a browser to zoom in. Their PlantUML sources are in the same directory. To regenerate the SVGs with PlantUML 1.2025.4:
+The [pattern overview](docs/uml/architecture.svg) shows how the six patterns cooperate. The [complete implementation class diagram](docs/uml/class-model.svg) shows the fields, constructors, method signatures and structural relationships of all 25 application types. The PDF includes both views, with one A2 landscape sheet for the detailed model. The [document class diagram](docs/uml/document-bridge.svg) and [print sequence](docs/uml/print-next.svg) can also be opened individually. The editable PlantUML sources are in the same directory. To regenerate the SVGs with PlantUML 1.2025.4:
 
 ```text
 java -jar plantuml.jar -charset UTF-8 -nometadata -tsvg "docs/uml/*.puml"

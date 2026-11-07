@@ -1,15 +1,16 @@
 @startuml
 skinparam backgroundColor white
 skinparam shadowing false
+skinparam monochrome true
 skinparam defaultFontName Arial
 skinparam defaultFontSize 15
-skinparam defaultFontColor #19333F
-skinparam rectangleBorderColor #91A7AC
-skinparam arrowColor #3D6271
+skinparam defaultFontColor #161616
+skinparam rectangleBorderColor #555555
+skinparam arrowColor #555555
 skinparam nodesep 24
 skinparam ranksep 22
-skinparam roundCorner 7
-rectangle B #EAF2FC [
+skinparam roundCorner 0
+rectangle B #F5F5F5 [
 <b>Builder</b>
 {{
 !include_many class-style.iuml
@@ -18,7 +19,7 @@ class PrintJob
 Builder .right.> PrintJob : builds
 }}
 ]
-rectangle D #FAF0E3 [
+rectangle D #F5F5F5 [
 <b>Decorator</b>
 {{
 !include_many class-style.iuml
@@ -36,7 +37,7 @@ PrintServiceDecorator <|-- Binding
 PrintService .right.> LineItem
 }}
 ]
-rectangle F #E1F2EE [
+rectangle F #F5F5F5 [
 <b>Facade</b>
 {{
 !include_many class-style.iuml
@@ -45,7 +46,7 @@ class ConsolePrinter
 PrintCenter -right-> ConsolePrinter
 }}
 ]
-rectangle S #EBEFFB [
+rectangle S #F5F5F5 [
 <b>Strategy</b>
 {{
 !include_many class-style.iuml
@@ -56,7 +57,7 @@ QueuePolicy <|.. FirstComeFirstServed
 QueuePolicy <|.. ShortestJobFirst
 }}
 ]
-rectangle O #FAEFE5 [
+rectangle O #F5F5F5 [
 <b>Observer</b>
 {{
 !include_many class-style.iuml
@@ -67,7 +68,7 @@ PrintSubscriber <|.. PrintJournal
 PrintSubscriber <|.. PrintStatistics
 }}
 ]
-rectangle G #F1EBF8 [
+rectangle G #F5F5F5 [
 <b>Bridge</b>
 {{
 !include_many class-style.iuml
@@ -86,8 +87,8 @@ DocumentRenderer <|.. MarkdownRenderer
 DocumentRenderer ..> DocumentField
 }}
 ]
-rectangle "Main" as Entry #EDF2F4
-rectangle "PrintOrder" as Order #EDF2F4
+rectangle "Main" as Entry #F5F5F5
+rectangle "PrintOrder" as Order #F5F5F5
 Entry ..> F
 Entry ..> G
 F ..> S : select
