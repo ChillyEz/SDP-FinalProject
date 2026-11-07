@@ -1,0 +1,64 @@
+@page {
+    size: A4 portrait;
+    margin: 18mm 18mm 17mm;
+    @top-left {
+        content: "Software Design Patterns";
+        font: 9pt Calibri, Arial, sans-serif;
+        color: #46636c;
+    }
+    @bottom-left {
+        content: "CampusPrint    /    Amir Baiseitov    /    SE-2505";
+        font: 9pt Calibri, Arial, sans-serif;
+        color: #46636c;
+    }
+    @bottom-right {
+        content: counter(page);
+        font: bold 9pt Calibri, Arial, sans-serif;
+        color: #24534f;
+    }
+}
+@page wide { size: A4 landscape; }
+@page :first { @top-left { content: none; } }
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    font: 11.4pt/1.36 Calibri, Arial, sans-serif;
+    color: #172f3a;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+}
+section { break-before: page; }
+section:first-child { break-before: auto; }
+h1, h2 { font-family: Georgia, 'Times New Roman', serif; font-weight: normal; color: #142f3a; }
+h1 { font-size: 45pt; margin: 8mm 0 2mm; line-height: 1.02; }
+h2 { font-size: 26pt; margin: 1mm 0 6mm; line-height: 1.12; }
+h3 {
+    margin: 6mm 0 2mm;
+    font: bold 14pt/1.15 Calibri, Arial, sans-serif;
+    color: #24645e;
+    break-after: avoid;
+}
+p { margin: 0 0 3.8mm; orphans: 2; widows: 2; }
+.cover > p:first-of-type { font: 19pt/1.2 Georgia, serif; color: #286560; margin-bottom: 7mm; }
+.cover > p:nth-of-type(2) { margin-bottom: 10mm; line-height: 1.55; color: #435b65; }
+.cover h3 { margin-top: 8mm; }
+strong { font-weight: 700; }
+table { border-collapse: collapse; width: 100%; margin: 4.5mm 0 5mm; font-size: 10.5pt; }
+th { text-align: left; background: #e5f1ed; color: #1d534e; }
+th, td { padding: 2.4mm 2.8mm; vertical-align: top; border-bottom: 0.5pt solid #d6e0de; }
+td:first-child { font-weight: bold; }
+code, pre { font-family: Consolas, 'Liberation Mono', monospace; }
+p code { font-size: 0.89em; }
+pre { font-size: 9.8pt; line-height: 1.36; background: #f0f5f5; padding: 3mm 4mm; margin: 3mm 0 4mm; white-space: pre-wrap; }
+figure { margin: 4mm 0; break-inside: avoid; }
+figure > img, figure > svg { display: block; max-width: 100%; width: 100%; height: auto; margin: 0 auto; }
+figcaption { color: #435c65; font-size: 9.5pt; line-height: 1.25; margin-top: 2mm; }
+.overview { page: wide; }
+.overview h2 { margin-bottom: 3mm; }
+.overview figure > svg { height: 115mm; width: 100%; }
+.overview p:last-child { margin-top: 3mm; }
+.chapter figure > svg { max-height: 103mm; }
+.chapter figure > img { width: auto; max-width: 100%; max-height: 80mm; }
+.listing h2 { font: 18pt/1.1 Georgia, serif; margin: 0 0 4mm; }
+.listing h3 { margin: 3.6mm 0 1.5mm; padding-bottom: 1mm; border-bottom: 0.6pt solid #afc6c4; font: bold 10pt/1.16 Calibri, Arial, sans-serif; }
+.listing pre { background: white; margin: 0; padding: 0; font: 9.1pt/1.26 Consolas, 'Liberation Mono', monospace; overflow-wrap: anywhere; tab-size: 4; }
