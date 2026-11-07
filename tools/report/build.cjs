@@ -21,10 +21,10 @@ function figure(_, caption, filename) {
 }
 
 function reportBody() {
-    const sections = read('REPORT.md').replaceAll('\r\n', '\n').trim().split(/\n(?=## )/);
-    return sections.map((section, index) => {
-        const kind = index === 0 ? 'cover' : section.startsWith('## Architecture\n') ? 'overview' : 'chapter';
-        const content = section.replace(/^!\[([^\]]+)\]\((docs\/[^)]+)\)$/gm, figure);
+    const sheets = read('REPORT.md').replaceAll('\r\n', '\n').trim().split(/\n---\n/);
+    return sheets.map(sheet => {
+        const kind = sheet.includes('(docs/uml/class-model.svg)') ? 'model-sheet' : 'sheet';
+        const content = sheet.replace(/^!\[([^\]]+)\]\((docs\/[^)]+)\)$/gm, figure);
         return '<section class="' + kind + '">' + marked.parse(content) + '</section>';
     }).join('\n');
 }
@@ -72,43 +72,14 @@ async function build() {
                 image.replaceWith(svg);
             }
 
-            let sheet;
-            let used = 0;
-            const capacity = 60;
+            const listing = document.querySelector('section:last-of-type');
             for (const { name, source } of files) {
-                const lines = source.split('\n');
-                let cursor = 0;
-                while (cursor < lines.length) {
-                    if (!sheet || used + Math.min(12, lines.length - cursor) + 4 > capacity) {
-                        sheet = document.createElement('section');
-                        sheet.className = 'listing';
-                        const title = document.createElement('h2');
-                        title.textContent = 'Appendix · Java source';
-                        sheet.append(title);
-                        document.body.append(sheet);
-                        used = 0;
-                    }
-                    // Reserve space for wrapped source lines in the print column.
-                    const rows = line => Math.max(1, Math.ceil(line.length / 96));
-                    let end = cursor;
-                    let cost = 0;
-                    while (end < lines.length && used + 4 + cost + rows(lines[end]) <= capacity) {
-                        cost += rows(lines[end++]);
-                    }
-                    if (end < lines.length) {
-                        const blank = lines.lastIndexOf('', end - 1);
-                        if (blank >= cursor + 5 && end - blank <= 10) end = blank + 1;
-                    }
-                    const part = lines.slice(cursor, end);
-                    const label = document.createElement('h3');
-                    label.textContent = name + (cursor ? ' (continued)' : '');
-                    const code = document.createElement('pre');
-                    code.textContent = part.join('\n');
-                    sheet.append(label, code);
-                    used += 4 + part.reduce((n, line) => n + rows(line), 0);
-                    cursor = end;
-                    if (cursor < lines.length) sheet = null;
-                }
+                const label = document.createElement('h3');
+                label.textContent = name;
+                const code = document.createElement('pre');
+                code.className = 'source';
+                code.textContent = source;
+                listing.append(label, code);
             }
         }, files);
         await page.evaluate(() => document.fonts.ready);

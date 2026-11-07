@@ -1,129 +1,129 @@
 # CampusPrint
 
-University print desk simulator
+University print desk simulator<br>
+Software Design Patterns · Final project defense<br>
+Amir Baiseitov · SE-2505 · November 2026
 
-**Amir Baiseitov** · SE-2505<br>
-Software Design Patterns · Final project defense · November 2026
+## 1. Introduction
 
-### Introduction
+A university print desk takes orders for individual pages or whole documents. A student may also ask for several copies, a cover or binding. The operator needs to know what to charge, which order to print next and what work has actually finished.
 
-Two students bring work to a print desk. One wants a bound thesis. The other needs two copies of a short application. The operator must quote each order, choose a job to print and record what actually finished. CampusPrint models those decisions in one Java application.
+I developed CampusPrint as an individual Java project. My aim was to use six design patterns to answer those questions in one console application. The program simulates a single printer. It calculates prices and page counts, maintains a queue in memory and records completed jobs. It can also simulate a paper jam.
 
-The interesting case occurs when the operator changes the queue policy after accepting both jobs. Arrival order favors the thesis. Shortest job first favors the application, until the requested copy count makes it the larger job. The decision depends on the same print volume used for billing and statistics.
+## 2. Main body
 
-### The reference orders
+### 2.1 The reference orders
 
-| Order | Selected pages | Copies | Services | Amount |
-| --- | --- | --- | --- | ---: |
-| 1 · Thesis | 1–80 of 80 | 1 | Print, cover, bind | 1,900 KZT |
-| 2 · Application | 2–3 of 5 | 2 | Print | 80 KZT |
+The operator first accepts a thesis and then an application. Page ranges include both endpoints. Printing costs 20 KZT per printed page, a cover costs 100 KZT per copy, and binding costs 200 KZT per copy.
 
-### Scope and contribution
+| Order | Pages selected | Copies | Printed pages | Services | Total |
+| --- | --- | ---: | ---: | --- | ---: |
+| 1. Thesis | 1-80 of 80 | 1 | 80 | Printing, cover, binding | 1,900 KZT |
+| 2. Application | 2-3 of 5 | 2 | 4 | Printing | 80 KZT |
 
-I implemented the six course patterns, integrated them in a single print workflow and prepared its verification cases. The simulation runs in one process with an in-memory queue. A successful printer call writes to the terminal. An injected paper jam exercises the failure path. The program calculates every quoted amount, queue selection and completion count.
+The application is a useful case for checking the design. Selecting pages 2 and 3 in two copies produces four printed pages. Billing uses that number to calculate 80 KZT. The shortest-job policy uses it to select the application. Once the printer finishes, the statistics subscriber adds exactly four pages. All three operations obtain the volume from the same `PrintJob`.
 
-## Architecture
+The thesis illustrates a different connection. Adding binding increases the price on the customer's receipt by 200 KZT and adds "Binding" to the operator's job ticket. Both documents use the services attached to the accepted order.
 
-The two gray boxes connect the six pattern groups. `Main` assembles the demonstration. `PrintOrder` pairs a numbered job with its pricing services. Both document types read that same order.
+---
 
-![Figure 1. CampusPrint class overview. Within each group, hollow triangles point to a supertype. Labeled dependencies between groups show how the parts collaborate.](docs/uml/architecture.svg)
+### 2.2 Pattern overview
 
-Follow the **queue** relationship to see what the operator schedules. Follow **service** to find where a charge originates. Follow **read** from Bridge to see how that charge reaches the customer.
+![Figure 1. The six patterns in CampusPrint. PrintOrder connects a validated job to its services. PrintCenter coordinates the printer, queue policy and subscribers.](docs/uml/architecture.svg)
 
-## Building and pricing an order
-
-### Builder
-
-`PrintJob.Builder` starts with a document name and its total page count. The full document and one copy are the defaults. Range and copy settings remain private to the builder until `build()` validates them and takes an immutable snapshot. An invalid job cannot enter the queue.
+**Builder.** A new `PrintJob.Builder` defaults to the whole document and one copy. The operator can set a range and copy count before calling `build()`. The builder rejects a range outside the document, a nonpositive quantity or a volume too large to store. An accepted job is immutable, so switching queue policies cannot change its page count.
 
 ```java
-PrintJob application = new PrintJob.Builder("Application", 5)
-        .range(2, 3)
-        .copies(2)
-        .build();
+return new PrintJob.Builder("Application", 5).range(2, 3).copies(copies).build();
 ```
 
-Both endpoints count. Pages 2 through 3 produce two pages per copy, or four printed pages for this order. The builder checks the multiplication in 64-bit arithmetic before accepting a volume that must fit a Java `int`. This keeps an oversized batch from appearing to cost zero or jumping ahead in the queue.
-
-### Decorator
-
-The operator chooses finishing services at acceptance. Each decorator wraps a `PrintService`, preserves its line items and appends one charge of its own. The chain rejects a second occurrence of the same finish.
+**Decorator.** `BasicPrinting` creates the charge for the printed pages. `Cover` and `Binding` each wrap another `PrintService`, retain its line items and add one finishing charge per copy. For the thesis the calculation is 80 × 20 + 100 + 200 = 1,900 KZT. A second cover is rejected even if another decorator sits between the two covers.
 
 ```java
-PrintJob thesis = new PrintJob.Builder("Thesis", 80).build();
-PrintOrder order = center.acceptOrder(thesis,
-        new Binding(new Cover(new BasicPrinting())));
+return center.acceptOrder(thesis, new Binding(new Cover(new BasicPrinting())));
 ```
 
-| Thesis receipt | Calculation | Amount |
-| --- | --- | ---: |
-| Printing | 80 printed pages × 20 KZT | 1,600 KZT |
-| Cover | 1 copy × 100 KZT | 100 KZT |
-| Binding | 1 copy × 200 KZT | 200 KZT |
-| **Total** | **Sum of the line items** | **1,900 KZT** |
+---
 
-The production ticket takes its operation names from the same line items. Choosing binding once therefore supplies both the price on the receipt and the instruction at the printer. Charges use whole tenge stored in a Java `long`.
+### 2.3 Implementation class diagram
 
-## Scheduling and completion
+![Figure 2. The 24 application source files define 25 types, including the nested PrintJob.Builder. The diagram shows their fields, constructors and operations.](docs/uml/class-model.svg)
 
-**Strategy.** `FirstComeFirstServed` selects the queue head. `ShortestJobFirst` scans for the smallest print volume and keeps the earlier entry on a tie. Preview and print call the same selection method. Switching policies preserves arrival order.
+Visibility is marked with `+` (public), `-` (private) and `#` (protected). Underlining marks a static member. Parameter types appear inside parentheses. Hollow triangles point to a superclass or implemented interface. Solid associations show stored references, including the pending orders and subscribers held by PrintCenter. Method signatures also show types used as arguments and results.
 
-**Facade.** One call to `PrintCenter.printNext()` selects the job, runs the printer, removes the completed order and publishes its completion. A paper jam interrupts this sequence before removal. An operator can clear the fault and retry that same order.
+---
 
-![Figure 2. A print request has three outcomes. Only a successful return from the printer reaches the notification loop.](docs/uml/print-next.svg)
+### 2.4 Selecting and completing a job
 
-**Observer.** The journal records the order number and title. Statistics count completed jobs and pages. The center snapshots the subscriber list before dispatch, so a subscription change during a callback applies to the next event. Each registered observer receives one call for the current event.
+**Strategy.** `PrintCenter.peekNext()` asks the active `QueuePolicy` to select from the pending orders in arrival order. FIFO takes the first entry. Shortest job first scans the list and replaces its candidate only when it finds a strictly smaller job. This gives the earlier order priority on a tie. Changing the strategy leaves both jobs in place.
 
-## Documents and output formats
+**Facade.** The operator calls `PrintCenter.printNext()`. The center uses the same preview to select the order, sends it to the printer and removes it only after printing succeeds. If the printer throws a paper-jam exception, the order remains pending for a retry.
 
-**Bridge.** The customer needs an itemized price. The operator needs the range, copies and finishing instructions. `Receipt` and `JobTicket` choose the fields. Their shared base class holds a `DocumentRenderer` and passes it a title and those fields.
+![Figure 3. The three outcomes of printNext(). A paper jam leaves the queue intact. A successful print triggers one callback per registered subscriber.](docs/uml/print-next.svg)
 
-![Figure 3. Document content and output format vary independently. Both concrete document types inherit the same renderer reference.](docs/uml/document-bridge.svg)
+**Observer.** `PrintJournal` records the completed order's number and title. `PrintStatistics` increments the job and page totals. Both receive the order through `onPrinted(order)`. The center takes a snapshot of the subscriber list so an observer can unsubscribe during its callback without causing another observer to miss that print.
 
-The text renderer aligns labels and values. The Markdown renderer emits a two-column table and escapes table delimiters in input. The demo renders both documents in both formats for order 1. Its price and finishing services agree across all four outputs.
+The retry check uses two ten-page orders, Handout and Worksheet. With a simulated jam on Handout, both remain in the queue and the journal is empty. After the fault is cleared, the journal records Handout followed by Worksheet and the counter reads 20 pages. This checks the point at which the facade publishes completion.
 
-![Figure 4. Two plain-text documents from the same accepted order. Cover and Binding appear on the receipt and in the operator's instructions.](docs/screenshots/documents.png)
+---
 
-## Demonstration results
+### 2.5 Receipt and job ticket
 
-### Switching policy on a live queue
+**Bridge.** The customer needs an itemized bill. The operator needs a page range, copy count and finishing instructions. `Receipt` and `JobTicket` choose the relevant fields from the same `PrintOrder`. Their base class, `OrderDocument`, passes the title and fields to its `DocumentRenderer`.
 
-FIFO previews order 1, which arrived first. The operator switches to shortest job first. The four-page application prints next. Its completion reaches both subscribers while the thesis remains pending.
+The text renderer aligns labels and values. The Markdown renderer puts the same fields into a table and escapes vertical bars in field values. The operator can choose either renderer for either document. Adding a new output format requires one renderer that both documents can use.
 
-![Figure 5. Terminal capture of the Java process showing the two previews and the first completed job.](docs/screenshots/queue.png)
+![Figure 4. Terminal screenshot of the thesis receipt and production ticket in plain text. Cover and binding appear in both documents.](docs/screenshots/documents.png)
 
-### Changing the order quantity
+![Figure 5. Terminal screenshot of the same receipt in Markdown. The three charges and the 1,900 KZT total agree with Figure 4.](docs/screenshots/markdown.png)
 
-After the thesis prints, the empty-queue request leaves the totals at two orders and 84 pages. The next comparison starts with a fresh queue. Fifty copies of the two-page application now require 100 pages, so the 80-page thesis wins under the same shortest-job policy.
+---
 
-![Figure 6. End of the original run and the fresh comparison. Order numbers restart with each new print center.](docs/screenshots/comparison.png)
+### 2.6 Application run
 
-To change the comparison at the defense, run `java -cp out campusprint.Main 10`. Ten copies require 20 pages and cost 400 KZT. At 40 copies the volumes tie, so arrival order decides.
+From the project root, compile and run the demonstration with JDK 17 or later.
 
-## Verification and conclusions
+```text
+javac --release 17 -encoding UTF-8 -d out -sourcepath src src/campusprint/Main.java
+java -cp out campusprint.Main
+```
 
-### Verification
+![Figure 6. On the same queue, FIFO previews the thesis and shortest job first previews the application. Printing order 2 updates the journal and the page count.](docs/screenshots/queue.png)
 
-The project compiles against the Java 17 API. The executable checks use the standard library and throw an assertion error on a mismatch. Run `java -cp out campusprint.PrintCenterChecks` after compilation.
+![Figure 7. The first run finishes with two orders and 84 pages. In a fresh queue, increasing the application to 50 copies changes which job is shortest.](docs/screenshots/comparison.png)
 
-| Case | Expected and observed result |
+The optional command-line argument sets the application copy count in the fresh queue. Run `java -cp out campusprint.Main 40` to reach the boundary: both orders have 80 pages and the earlier thesis wins. At 39 copies the application has 78 pages and is selected first.
+
+---
+
+### 2.7 Verification
+
+The regression checks run independently of the demonstration. They throw an assertion error if an observed value differs from the expected value.
+
+```text
+javac --release 17 -encoding UTF-8 -cp out -d out test/campusprint/PrintCenterChecks.java
+java -cp out campusprint.PrintCenterChecks
+```
+
+| Check | Observed result |
 | --- | --- |
-| Invalid job | Reject a blank title, zero copies, an inverted range and an out-of-bounds range. |
-| Volume limit | Reject 65,536 pages × 65,536 copies before accepting the job. Large valid charges and cumulative page totals retain their full value. |
-| Finishing | Three copies of four pages with two finishes total 1,140 KZT. Reject a duplicate cover even when binding is nested between the two covers. |
-| Scheduling | On a tie the earlier job wins. Preview leaves both entries in place. |
-| Paper jam and retry | The queue and journal retain their pre-print state. After recovery, each job completes once. |
-| Subscription changes | A subscriber can remove itself during delivery. The next subscriber still sees that print. A newly registered subscriber starts with the next print. |
-| Document formatting | A title containing a vertical bar and a line break stays in one Markdown table cell. |
+| Invalid range or copy count | An inverted range, a range beyond the document and zero copies are rejected before acceptance. |
+| Numeric limits | A batch of 65,536 pages × 65,536 copies is rejected. Prices and cumulative page totals above the 32-bit limit retain their value. |
+| Combined services | Three copies of four pages with both finishes cost 1,140 KZT. Reading the quote twice preserves the original line items. |
+| Jam, recovery and empty queue | A failed print leaves the queue, journal and statistics unchanged. After recovery both jobs complete once. An empty-queue request adds no completion. |
+| Subscription change | A subscriber removes itself during a callback. The remaining subscriber still receives the event. A new subscriber starts on the next event. |
+| Formatting and live selection | A title with a vertical bar and a line break stays in one Markdown table cell. At 10 copies the comparison selects the 20-page application and quotes 400 KZT. |
 
-### Conclusion
+## 3. Conclusion
 
-A single order carries its validated page range, copy count and chosen services from acceptance through billing, scheduling and reporting. In the reference run the print center completes 84 pages in two jobs. Raising the application quantity reverses the scheduling decision without any change to the algorithm.
+CampusPrint applies all six patterns to the same orders. In the reference run the four-page application prints first under shortest job first, the journal records order 2, and the page counter increases by four. The thesis then prints with the same finishing services shown on its receipt. The failed-print check also confirms that accepting an order and completing it are separate events.
 
-### Future work
+## 4. Future work
 
-A persistent queue would let an operator resume outstanding work after a restart. It would need a durable order identifier and an explicit recovery policy for a job interrupted during printing. A further extension would route orders to printers with different finishing capabilities. The operator's ticket already identifies the required operations.
+The queue currently lasts for one program run. Persisting accepted and completed orders would allow recovery after a restart. The recovery design would need to distinguish a pending job from a job that reached the printer just before the application stopped. A second extension would add a maximum waiting time to the shortest-job policy so that repeated small jobs cannot postpone a long thesis indefinitely.
 
-### Java source
+---
 
-The PDF appendix contains the complete application listing from `src/campusprint`. The source ZIP also includes the executable regression checks, the editable UML and the build instructions.
+## 5. Java source code
+
+The listing contains all application files under `src/campusprint`. The accompanying ZIP also includes the regression checks in `test/campusprint`.
