@@ -1,0 +1,99 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 15
+skinparam defaultFontColor #19333F
+skinparam rectangleBorderColor #91A7AC
+skinparam arrowColor #3D6271
+skinparam nodesep 24
+skinparam ranksep 22
+skinparam roundCorner 7
+rectangle B #EAF2FC [
+<b>Builder</b>
+{{
+!include_many class-style.iuml
+class "PrintJob.Builder" as Builder
+class PrintJob
+Builder .right.> PrintJob : builds
+}}
+]
+rectangle D #FAF0E3 [
+<b>Decorator</b>
+{{
+!include_many class-style.iuml
+interface PrintService <<interface>>
+abstract class PrintServiceDecorator
+class BasicPrinting
+class Cover
+class Binding
+class LineItem <<record>>
+PrintService <|.. BasicPrinting
+PrintService <|.. PrintServiceDecorator
+PrintServiceDecorator o-left- PrintService : wraps
+PrintServiceDecorator <|-- Cover
+PrintServiceDecorator <|-- Binding
+PrintService .right.> LineItem
+}}
+]
+rectangle F #E1F2EE [
+<b>Facade</b>
+{{
+!include_many class-style.iuml
+class PrintCenter
+class ConsolePrinter
+PrintCenter -right-> ConsolePrinter
+}}
+]
+rectangle S #EBEFFB [
+<b>Strategy</b>
+{{
+!include_many class-style.iuml
+interface QueuePolicy <<interface>>
+class FirstComeFirstServed
+class ShortestJobFirst
+QueuePolicy <|.. FirstComeFirstServed
+QueuePolicy <|.. ShortestJobFirst
+}}
+]
+rectangle O #FAEFE5 [
+<b>Observer</b>
+{{
+!include_many class-style.iuml
+interface PrintSubscriber <<interface>>
+class PrintJournal
+class PrintStatistics
+PrintSubscriber <|.. PrintJournal
+PrintSubscriber <|.. PrintStatistics
+}}
+]
+rectangle G #F1EBF8 [
+<b>Bridge</b>
+{{
+!include_many class-style.iuml
+abstract class OrderDocument
+class Receipt
+class JobTicket
+interface DocumentRenderer <<interface>>
+class PlainTextRenderer
+class MarkdownRenderer
+class DocumentField <<record>>
+OrderDocument <|-- Receipt
+OrderDocument <|-- JobTicket
+OrderDocument -right-> DocumentRenderer
+DocumentRenderer <|.. PlainTextRenderer
+DocumentRenderer <|.. MarkdownRenderer
+DocumentRenderer ..> DocumentField
+}}
+]
+rectangle "Main" as Entry #EDF2F4
+rectangle "PrintOrder" as Order #EDF2F4
+Entry ..> F
+Entry ..> G
+F ..> S : select
+F ..> O : notify
+F ..> Order : queue
+G ..> Order : read
+Order ..> B : job
+Order ..> D : service
+@enduml

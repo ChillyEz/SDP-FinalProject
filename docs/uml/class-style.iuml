@@ -1,0 +1,12 @@
+hide empty members
+hide circle
+skinparam backgroundColor transparent
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam defaultFontColor #1A3440
+skinparam shadowing false
+skinparam classBackgroundColor #FFFFFF
+skinparam classBorderColor #74909A
+skinparam arrowColor #546C78
+skinparam nodesep 12
+skinparam ranksep 14
