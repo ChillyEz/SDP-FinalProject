@@ -35,6 +35,11 @@ public final class PrintOrder {
         return job.printedPages();
     }
 
+    public String summary() {
+        int pages = printedPages();
+        return "#%d %s (%d %s)".formatted(id, job.documentName(), pages, pages == 1 ? "page" : "pages");
+    }
+
     public List<LineItem> items() {
         return List.copyOf(service.itemsFor(job));
     }

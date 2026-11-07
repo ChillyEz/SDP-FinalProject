@@ -92,7 +92,6 @@ public final class Main {
 
     private static void showPreview(PrintCenter center) {
         PrintOrder next = center.peekNext().orElseThrow();
-        System.out.printf("%s -> #%d %s (%d pages)%n",
-                center.queuePolicy().name(), next.id(), next.job().documentName(), next.printedPages());
+        System.out.println(center.queuePolicy().name() + " -> " + next.summary());
     }
 }

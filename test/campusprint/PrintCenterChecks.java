@@ -2,8 +2,11 @@ package campusprint;
 
 import campusprint.center.ConsolePrinter;
 import campusprint.center.PrintCenter;
+import campusprint.document.DocumentField;
+import campusprint.document.DocumentRenderer;
 import campusprint.document.JobTicket;
 import campusprint.document.MarkdownRenderer;
+import campusprint.document.Receipt;
 import campusprint.domain.PrintJob;
 import campusprint.domain.PrintOrder;
 import campusprint.observer.PrintJournal;
@@ -17,6 +20,7 @@ import campusprint.queue.ShortestJobFirst;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 
 public final class PrintCenterChecks {
@@ -24,6 +28,7 @@ public final class PrintCenterChecks {
         checkJobLimitsAndPrices();
         checkSchedulingAndRetry();
         checkSubscriptionChanges();
+        checkDocumentBridge();
         checkMarkdownCells();
         checkConsoleDemo();
         System.out.println("All regression checks passed.");
@@ -43,6 +48,8 @@ public final class PrintCenterChecks {
         check(order.items().equals(List.of(new LineItem("Printing", 240),
                 new LineItem("Binding", 600), new LineItem("Cover", 300))), "Finishing charges per copy");
         check(order.totalCost() == 1_140 && order.items().size() == 3, "Repeatable quote");
+        PrintOrder onePage = accept(new PrintCenter(), "Letter", 1);
+        check(onePage.summary().equals("#1 Letter (1 page)"), "Single-page order summary");
 
         PrintJob batch = new PrintJob.Builder("Batch", 1).copies(Integer.MAX_VALUE).build();
         PrintOrder maximum = new PrintOrder(2, batch, new Cover(new Binding(new BasicPrinting())));
@@ -96,6 +103,28 @@ public final class PrintCenterChecks {
         center.printNext();
         check(statistics.completedOrders() == 2, "Self-unsubscribe preserves the other subscription");
         check(joinedLater.entries().equals(List.of("#2 Second")), "New subscription starts with the next event");
+    }
+
+    private static void checkDocumentBridge() {
+        PrintJob notes = new PrintJob.Builder("Lab notes", 12).range(3, 5).copies(2).build();
+        PrintOrder order = new PrintCenter().acceptOrder(notes, new Cover(new BasicPrinting()));
+        List<List<DocumentField>> received = new ArrayList<>();
+        DocumentRenderer renderer = (title, fields) -> {
+            received.add(List.copyOf(fields));
+            return "Rendered " + title;
+        };
+
+        check(new Receipt(renderer).render(order).equals("Rendered Receipt #1 / Lab notes"),
+                "Receipt delegates rendering");
+        check(new JobTicket(renderer).render(order).equals("Rendered Job ticket #1 / Lab notes"),
+                "Ticket delegates rendering");
+
+        List<DocumentField> charges = List.of(new DocumentField("Printing", "120 KZT"),
+                new DocumentField("Cover", "200 KZT"), new DocumentField("Total", "320 KZT"));
+        List<DocumentField> instructions = List.of(new DocumentField("Document", "Lab notes"),
+                new DocumentField("Page range", "3-5 of 12"), new DocumentField("Copies", "2"),
+                new DocumentField("Printed pages", "6"), new DocumentField("Operations", "Printing, Cover"));
+        check(received.equals(List.of(charges, instructions)), "One renderer receives charges and instructions");
     }
 
     private static void checkMarkdownCells() {

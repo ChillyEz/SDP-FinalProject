@@ -13,7 +13,6 @@ public final class ConsolePrinter {
         if (simulateFailure) {
             throw new IllegalStateException("Paper jam on order #" + order.id() + ".");
         }
-        System.out.printf("Printed #%d %s (%d pages)%n",
-                order.id(), order.job().documentName(), order.printedPages());
+        System.out.println("Printed " + order.summary());
     }
 }
