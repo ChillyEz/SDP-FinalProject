@@ -14,6 +14,9 @@ import campusprint.pricing.Binding;
 import campusprint.pricing.Cover;
 import campusprint.pricing.LineItem;
 import campusprint.queue.ShortestJobFirst;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 public final class PrintCenterChecks {
@@ -22,6 +25,7 @@ public final class PrintCenterChecks {
         checkSchedulingAndRetry();
         checkSubscriptionChanges();
         checkMarkdownCells();
+        checkConsoleDemo();
         System.out.println("All regression checks passed.");
     }
 
@@ -98,6 +102,32 @@ public final class PrintCenterChecks {
         PrintOrder order = accept(new PrintCenter(), "Part I | Appendix\nA", 1);
         String markdown = new JobTicket(new MarkdownRenderer()).render(order);
         check(markdown.contains("| Document | Part I \\| Appendix A |"), "Markdown table preserves one cell");
+    }
+
+    private static void checkConsoleDemo() {
+        String standard = demoOutput();
+        check(standard.contains("First come, first served -> #1 Thesis (80 pages)"), "FIFO preview");
+        check(standard.contains("Shortest job first -> #2 Application (4 pages)"), "Shortest job preview");
+        check(standard.contains("Completed orders: 2 | Printed pages: 84"), "Final desk statistics");
+        check(standard.contains("| Total | 1,900 KZT |"), "Markdown receipt");
+        check(standard.contains("| Operations | Printing, Cover, Binding |"), "Markdown ticket");
+        check(standard.endsWith("Shortest job first -> #1 Thesis (80 pages)"), "50-copy comparison");
+
+        String smaller = demoOutput("10");
+        check(smaller.contains("#2 Application | copies: 10 | pages: 20 | 400 KZT"), "Repriced comparison");
+        check(smaller.endsWith("Shortest job first -> #2 Application (20 pages)"), "Live selection");
+    }
+
+    private static String demoOutput(String... args) {
+        PrintStream original = System.out;
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        try (PrintStream capture = new PrintStream(bytes, true, StandardCharsets.UTF_8)) {
+            System.setOut(capture);
+            Main.main(args);
+        } finally {
+            System.setOut(original);
+        }
+        return bytes.toString(StandardCharsets.UTF_8).stripTrailing();
     }
 
     private static PrintOrder accept(PrintCenter center, String title, int pages) {
