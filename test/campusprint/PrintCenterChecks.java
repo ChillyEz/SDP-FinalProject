@@ -34,7 +34,7 @@ public final class PrintCenterChecks {
         System.out.println("All regression checks passed.");
     }
 
-    private static void checkJobLimitsAndPrices() {
+    static void checkJobLimitsAndPrices() {
         expectFailure(IllegalArgumentException.class, () -> new PrintJob.Builder(" ", 5).build());
         expectFailure(IllegalArgumentException.class, () -> new PrintJob.Builder("Letter", 5).copies(0).build());
         expectFailure(IllegalArgumentException.class, () -> new PrintJob.Builder("Letter", 5).range(3, 2).build());
@@ -60,7 +60,7 @@ public final class PrintCenterChecks {
         check(statistics.totalPrintedPages() == (long) Integer.MAX_VALUE + 12, "64-bit cumulative pages");
     }
 
-    private static void checkSchedulingAndRetry() {
+    static void checkSchedulingAndRetry() {
         ConsolePrinter printer = new ConsolePrinter();
         PrintCenter center = new PrintCenter(printer, new ShortestJobFirst());
         PrintJournal journal = new PrintJournal();
@@ -84,7 +84,7 @@ public final class PrintCenterChecks {
         check(statistics.completedOrders() == 2 && statistics.totalPrintedPages() == 20, "No phantom completion");
     }
 
-    private static void checkSubscriptionChanges() {
+    static void checkSubscriptionChanges() {
         PrintCenter center = new PrintCenter();
         PrintJournal joinedLater = new PrintJournal();
         PrintStatistics statistics = new PrintStatistics();
@@ -105,7 +105,7 @@ public final class PrintCenterChecks {
         check(joinedLater.entries().equals(List.of("#2 Second")), "New subscription starts with the next event");
     }
 
-    private static void checkDocumentBridge() {
+    static void checkDocumentBridge() {
         PrintJob notes = new PrintJob.Builder("Lab notes", 12).range(3, 5).copies(2).build();
         PrintOrder order = new PrintCenter().acceptOrder(notes, new Cover(new BasicPrinting()));
         List<List<DocumentField>> received = new ArrayList<>();
@@ -127,13 +127,13 @@ public final class PrintCenterChecks {
         check(received.equals(List.of(charges, instructions)), "One renderer receives charges and instructions");
     }
 
-    private static void checkMarkdownCells() {
+    static void checkMarkdownCells() {
         PrintOrder order = accept(new PrintCenter(), "Part I | Appendix\nA", 1);
         String markdown = new JobTicket(new MarkdownRenderer()).render(order);
         check(markdown.contains("| Document | Part I \\| Appendix A |"), "Markdown table preserves one cell");
     }
 
-    private static void checkConsoleDemo() {
+    static void checkConsoleDemo() {
         String standard = demoOutput();
         check(standard.contains("First come, first served -> #1 Thesis (80 pages)"), "FIFO preview");
         check(standard.contains("Shortest job first -> #2 Application (4 pages)"), "Shortest job preview");
