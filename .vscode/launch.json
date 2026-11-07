@@ -1,0 +1,28 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "CampusPrint",
+            "type": "java",
+            "request": "launch",
+            "mainClass": "campusprint.Main",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "CampusPrint (choose copies)",
+            "type": "java",
+            "request": "launch",
+            "mainClass": "campusprint.Main",
+            "console": "integratedTerminal",
+            "args": ["${input:comparisonCopies}"]
+        }
+    ],
+    "inputs": [
+        {
+            "id": "comparisonCopies",
+            "type": "promptString",
+            "description": "Number of application copies in the fresh queue",
+            "default": "39"
+        }
+    ]
+}

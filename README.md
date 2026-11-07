@@ -6,34 +6,48 @@ CampusPrint is a Java console simulation of a university print desk. Compare que
 
 ## Build and run
 
-Use a JDK with Java 17 or later. Run these commands from the project root. The application and its checks use only the Java standard library.
+Use JDK 17 or later. The project root is the folder containing `src`, `test` and this README.
 
-**PowerShell**
+### VS Code
 
-```powershell
-$files = (Get-ChildItem -Path src,test -Recurse -Filter *.java).FullName
-javac --release 17 -encoding UTF-8 -d out $files
-java -cp out campusprint.Main
-java -cp out campusprint.PrintCenterChecks
-```
+1. Use **File > Open Folder** to open the project root. With the **Extension Pack for Java** installed, wait for **Java: Ready** in the status bar.
+2. In **Run and Debug**, select **CampusPrint** and press **Ctrl+F5**. You can also open `src/campusprint/Main.java` and use **Run Java** or Code Runner's **Run Code** button.
+3. For a different copy count, select **CampusPrint (choose copies)** in **Run and Debug**, press **Ctrl+F5** and enter a positive integer.
+4. Open **Testing** (the beaker icon) and select **Run Tests**. Expand the project and `PrintCenterTest` to run any of the six tests individually. **Refresh Tests** updates the list after the folder opens.
 
-**Bash**
+### Terminal
 
-```bash
-mkdir -p out
-find src test -name '*.java' > out/sources.txt
-javac --release 17 -encoding UTF-8 -d out @out/sources.txt
-java -cp out campusprint.Main
-java -cp out campusprint.PrintCenterChecks
-```
-
-The main run prints an 80-page thesis and pages 2 through 3 of an application in two copies. FIFO previews the thesis. Shortest job first previews the application. A final comparison starts a fresh queue and changes the application to 50 copies. Supply a positive copy count to try another comparison:
+Run these commands in PowerShell or Bash from the project root.
 
 ```text
-java -cp out campusprint.Main 10
+javac --release 17 -encoding UTF-8 -d out -sourcepath src src/campusprint/Main.java
+java -cp out campusprint.Main
 ```
 
-The fresh queue only previews its next job. At 10 copies the application has 20 pages and is selected. Try 39 and 40 copies in turn. At 39 the 78-page application is shorter. At 40 both jobs have 80 pages and the earlier thesis wins the tie. At 50 copies the application has 100 pages and costs 2,000 KZT.
+`javac` writes the compiled classes to `out`. In the second command, `-cp out` tells Java where to find those classes and `campusprint.Main` is the package-qualified entry point. The optional number after the class name sets the application's copy count in the final, fresh queue. The initial run always prints the same two orders, totaling 84 pages.
+
+```text
+java -cp out campusprint.Main 39
+java -cp out campusprint.Main 40
+```
+
+Each application copy contains pages 2 and 3. At 39 copies the 78-page application wins the preview. At 40 copies both jobs have 80 pages and the earlier thesis wins the tie. Omitting the argument uses 50 copies.
+
+### Regression checks
+
+After compiling the application above, the same six checks can run directly on the JDK.
+
+```text
+javac --release 17 -encoding UTF-8 -cp out -d out test/campusprint/PrintCenterChecks.java
+java -cp out campusprint.PrintCenterChecks
+```
+
+To run the individual JUnit tests from a terminal, use the commands below. VS Code uses the same six test cases. The [JUnit Platform Console Standalone 1.14.4 distribution](https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-console-standalone/1.14.4/) is included in `lib/` with its license notices in the JAR.
+
+```text
+javac --release 17 -encoding UTF-8 -cp "lib/*" -sourcepath src -d out test/campusprint/PrintCenterChecks.java test/campusprint/PrintCenterTest.java
+java -jar lib/junit-platform-console-standalone-1.14.4.jar execute --class-path out --scan-class-path --fail-if-no-tests
+```
 
 ## Design
 

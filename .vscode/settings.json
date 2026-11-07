@@ -1,0 +1,9 @@
+{
+    "java.project.sourcePaths": ["src", "test"],
+    "java.project.outputPath": "bin",
+    "java.project.referencedLibraries": ["lib/junit-platform-console-standalone-1.14.4.jar"],
+    "code-runner.ignoreSelection": true,
+    "code-runner.executorMapByGlob": {
+        "{Main,PrintCenterChecks}.java": "javac --release 17 -encoding UTF-8 -sourcepath \"$workspaceRoot/src\" -d \"$workspaceRoot/out\" $fullFileName && java -cp \"$workspaceRoot/out\" campusprint.$fileNameWithoutExt"
+    }
+}
