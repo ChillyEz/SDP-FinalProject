@@ -9,7 +9,7 @@ A single operator accepts print orders, chooses a scheduling policy and prints t
 | Pattern | Responsibility | Demonstration |
 | --- | --- | --- |
 | Builder | Construct a valid, immutable print job | Select a page range and a copy count. Reject an inverted range. |
-| Decorator | Compose printing, cover and binding charges | Read the same line items in the receipt and the operator's ticket. |
+| Decorator | Compose printing, cover and binding charges | Each service adds a charge to the receipt and its operation name to the ticket. |
 | Strategy | Choose the next order in the current queue | Switch between arrival order and shortest job first. |
 | Facade | Coordinate selection, printing, removal and publication | Keep the pending order after a paper jam, then retry it. |
 | Observer | Deliver each completion to registered subscribers | Check the journal and the page count after printing. |

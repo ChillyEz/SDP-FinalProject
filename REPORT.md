@@ -29,9 +29,9 @@ The thesis illustrates a different connection. Adding binding increases the pric
 
 ### 2.2 Pattern overview
 
-![Figure 1. The six patterns in CampusPrint. PrintOrder connects a validated job to its services. PrintCenter coordinates the printer, queue policy and subscribers.](docs/uml/architecture.svg)
+![Figure 1. Colors identify the same pattern groups throughout. PrintCenter acts as the Facade, holds the selected policy as the Strategy context and publishes completions as the Observer subject. PrintOrder links a job to its services.](docs/uml/architecture.svg)
 
-**Builder.** A new `PrintJob.Builder` defaults to the whole document and one copy. The operator can set a range and copy count before calling `build()`. The builder rejects a range outside the document, a nonpositive quantity or a volume too large to store. An accepted job is immutable, so switching queue policies cannot change its page count.
+**Builder.** The thesis uses the defaults of one copy and the whole document. The application sets both options. When `build()` runs, it checks the final range and copy count together. It rejects pages outside the document, a nonpositive quantity or a total volume exceeding the per-job page limit. Pricing and scheduling then read the same immutable job.
 
 ```java
 return new PrintJob.Builder("Application", 5).range(2, 3).copies(copies).build();
@@ -55,7 +55,7 @@ Visibility is marked with `+` (public), `-` (private) and `#` (protected). Under
 
 ### 2.4 Selecting and completing a job
 
-**Strategy.** `PrintCenter.peekNext()` asks the active `QueuePolicy` to select from the pending orders in arrival order. FIFO takes the first entry. Shortest job first scans the list and replaces its candidate only when it finds a strictly smaller job. This gives the earlier order priority on a tie. Changing the strategy leaves both jobs in place.
+**Strategy.** `PrintCenter.peekNext()` asks the active `QueuePolicy` to select from the pending orders in arrival order. FIFO takes the first entry. Shortest job first compares printed page counts, including copies. It replaces its candidate only for a strictly smaller job, so the earlier order wins a tie. Finishing time is outside this estimate. Switching policies leaves both jobs pending.
 
 **Facade.** The operator calls `PrintCenter.printNext()`. The center uses the same preview to select the order, sends it to the printer and removes it only after printing succeeds. If the printer throws a paper-jam exception, the order remains pending for a retry.
 
@@ -71,11 +71,9 @@ The retry check uses two ten-page orders, Handout and Worksheet. With a simulate
 
 **Bridge.** The customer needs an itemized bill. The operator needs a page range, copy count and finishing instructions. `Receipt` and `JobTicket` choose the relevant fields from the same `PrintOrder`. Their base class, `OrderDocument`, passes the title and fields to its `DocumentRenderer`.
 
-The text renderer aligns labels and values. The Markdown renderer puts the same fields into a table and escapes vertical bars in field values. The operator can choose either renderer for either document. Adding a new output format requires one renderer that both documents can use.
+The text renderer aligns labels and values. The Markdown renderer puts the same fields into a table and escapes vertical bars in field values. A receipt pairs each service with its charge. A job ticket lists the same services as operations and gives the operator the range and copy count. Each renderer receives just a title and labeled fields, so it can format either document.
 
-![Figure 4. Terminal screenshot of the thesis receipt and production ticket in plain text. Cover and binding appear in both documents.](docs/screenshots/documents.png)
-
-![Figure 5. Terminal screenshot of the same receipt in Markdown. The three charges and the 1,900 KZT total agree with Figure 4.](docs/screenshots/markdown.png)
+![Figure 4. The first print adds four pages to the counter. For the pending thesis, the receipt shows 100 KZT for a cover and 200 KZT for binding. The job ticket lists both operations.](docs/screenshots/terminal-orders.png)
 
 ---
 
@@ -88,11 +86,9 @@ javac --release 17 -encoding UTF-8 -d out -sourcepath src src/campusprint/Main.j
 java -cp out campusprint.Main
 ```
 
-![Figure 6. On the same queue, FIFO previews the thesis and shortest job first previews the application. Printing order 2 updates the journal and the page count.](docs/screenshots/queue.png)
+![Figure 5. The Markdown ticket retains all five fields from the plain-text ticket. The first queue finishes with two orders and 84 printed pages. In the fresh queue, the final line previews the 80-page thesis ahead of the 100-page application.](docs/screenshots/terminal-completion.png)
 
-![Figure 7. The first run finishes with two orders and 84 pages. In a fresh queue, increasing the application to 50 copies changes which job is shortest.](docs/screenshots/comparison.png)
-
-The optional command-line argument sets the application copy count in the fresh queue. Run `java -cp out campusprint.Main 40` to reach the boundary: both orders have 80 pages and the earlier thesis wins. At 39 copies the application has 78 pages and is selected first.
+To test the selection yourself, run `java -cp out campusprint.Main 39` and then repeat with `40`. This argument changes the copy count only in the fresh queue. At 39 copies, two pages per copy give the application 78 pages and it wins the preview. At 40 copies both jobs have 80 pages, so the earlier thesis wins. Both orders remain pending in this comparison.
 
 ---
 
@@ -112,7 +108,8 @@ java -cp out campusprint.PrintCenterChecks
 | Combined services | Three copies of four pages with both finishes cost 1,140 KZT. Reading the quote twice preserves the original line items. |
 | Jam, recovery and empty queue | A failed print leaves the queue, journal and statistics unchanged. After recovery both jobs complete once. An empty-queue request adds no completion. |
 | Subscription change | A subscriber removes itself during a callback. The remaining subscriber still receives the event. A new subscriber starts on the next event. |
-| Formatting and live selection | A title with a vertical bar and a line break stays in one Markdown table cell. At 10 copies the comparison selects the 20-page application and quotes 400 KZT. |
+| Document content and format | One test renderer receives two different field lists for the same order. The receipt totals 320 KZT and the ticket specifies six pages and a cover. A title containing a vertical bar and a line break stays in one Markdown table cell. |
+| Live queue selection | At 10 copies the comparison previews the 20-page application and quotes 400 KZT. At the default 50 copies it previews the 80-page thesis. |
 
 ## 3. Conclusion
 

@@ -32,7 +32,6 @@ pre {
 figure { margin: 4mm 0; break-inside: avoid; }
 figure > svg, figure > img { display: block; width: 100%; height: auto; margin: 0 auto; }
 .sheet figure > svg { max-height: 116mm; }
-.sheet figure > img { width: auto; max-width: 100%; max-height: 76mm; border: 0.5pt solid #aaa; filter: grayscale(1); }
 figcaption { font-size: 10pt; line-height: 1.2; margin-top: 2mm; }
 .model-sheet { page: classModel; }
 .model-sheet figure > svg { height: 356mm; }

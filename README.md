@@ -33,7 +33,7 @@ The main run prints an 80-page thesis and pages 2 through 3 of an application in
 java -cp out campusprint.Main 10
 ```
 
-At 10 copies the application has 20 pages and prints first. At 40 copies both orders have 80 pages and the earlier thesis wins. At 50 copies the application has 100 pages and costs 2,000 KZT.
+The fresh queue only previews its next job. At 10 copies the application has 20 pages and is selected. Try 39 and 40 copies in turn. At 39 the 78-page application is shorter. At 40 both jobs have 80 pages and the earlier thesis wins the tie. At 50 copies the application has 100 pages and costs 2,000 KZT.
 
 ## Design
 
@@ -50,7 +50,7 @@ The [project specification](PROJECT_PLAN.md) gives the business rules. The [repo
 
 ## Report and UML
 
-The [pattern overview](docs/uml/architecture.svg) shows how the six patterns cooperate. The [complete implementation class diagram](docs/uml/class-model.svg) shows the fields, constructors, method signatures and structural relationships of all 25 application types. The PDF includes both views, with one A2 landscape sheet for the detailed model. The [document class diagram](docs/uml/document-bridge.svg) and [print sequence](docs/uml/print-next.svg) can also be opened individually. The editable PlantUML sources are in the same directory. To regenerate the SVGs with PlantUML 1.2025.4:
+The [pattern overview](docs/uml/architecture.svg) shows how the six patterns cooperate. Each pattern keeps the same color across the diagrams. The [complete implementation class diagram](docs/uml/class-model.svg) shows the fields, constructors, method signatures and structural relationships of all 25 application types. The PDF includes both views, with one A2 landscape sheet for the detailed model. The [document class diagram](docs/uml/document-bridge.svg) and [print sequence](docs/uml/print-next.svg) can also be opened individually. The editable PlantUML sources are in the same directory. To regenerate the SVGs with PlantUML 1.2025.4:
 
 ```text
 java -jar plantuml.jar -charset UTF-8 -nometadata -tsvg "docs/uml/*.puml"
