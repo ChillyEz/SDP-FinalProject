@@ -1,4 +1,4 @@
-package "Entry point" as EntrypointGroup {
+package "Entry point" as EntrypointGroup COLOR_NEUTRAL {
     class Main {
         {static} + main(String[]) : void
         {static} - acceptThesis(PrintCenter) : PrintOrder
@@ -9,7 +9,7 @@ package "Entry point" as EntrypointGroup {
     }
 }
 
-package "Bridge" as BridgeGroup {
+package "Bridge" as BridgeGroup COLOR_BRIDGE {
     abstract class OrderDocument {
         - renderer : DocumentRenderer
         # OrderDocument(DocumentRenderer)

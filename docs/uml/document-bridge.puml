@@ -1,8 +1,8 @@
 @startuml
+!include pattern-colors.iuml
 !pragma layout smetana
 skinparam backgroundColor #FFFFFF
 skinparam shadowing false
-skinparam monochrome true
 skinparam defaultFontName Arial
 skinparam defaultFontSize 14
 skinparam defaultFontColor #161616
@@ -18,7 +18,7 @@ hide circle
 hide empty members
 skinparam nodesep 26
 skinparam ranksep 26
-package "Document content" #F5F5F5 {
+package "Document content" COLOR_BRIDGE {
     abstract class OrderDocument {
         +render(order) : String
         {abstract} #title(order) : String
@@ -29,7 +29,7 @@ package "Document content" #F5F5F5 {
     OrderDocument <|-- Receipt
     OrderDocument <|-- JobTicket
 }
-package "Output format" #F5F5F5 {
+package "Output format" COLOR_BRIDGE {
     interface DocumentRenderer {
         +render(title, fields) : String
     }

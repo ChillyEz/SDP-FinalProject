@@ -1,11 +1,12 @@
 @startuml
+!include pattern-colors.iuml
 !include model-style.iuml
 !include model-orders.iuml
 !include model-desk.iuml
 !include model-documents.iuml
 
 Main ..> PrintCenter : configures
-Main ..> Receipt : displays
+Main ..> OrderDocument : renders
 PrintCenter --> "0..*" PrintOrder : pendingOrders
 OrderDocument ..> PrintOrder : reads
 PrintOrder -[hidden]down-> PrintServiceDecorator

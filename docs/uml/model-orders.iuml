@@ -1,4 +1,4 @@
-package "Builder" as BuilderGroup {
+package "Builder" as BuilderGroup COLOR_BUILDER {
     class "PrintJob.Builder" as Builder {
         - documentName : String
         - totalPages : int
@@ -28,7 +28,7 @@ package "Builder" as BuilderGroup {
     }
 }
 
-package "Accepted order" as AcceptedorderGroup {
+package "Accepted order" as AcceptedorderGroup COLOR_NEUTRAL {
     class PrintOrder {
         - id : int
         - job : PrintJob
@@ -38,13 +38,14 @@ package "Accepted order" as AcceptedorderGroup {
         + job() : PrintJob
         + service() : PrintService
         + printedPages() : int
+        + summary() : String
         + items() : List<LineItem>
         + totalCost() : long
         + toString() : String
     }
 }
 
-package "Decorator" as DecoratorGroup {
+package "Decorator" as DecoratorGroup COLOR_DECORATOR {
     interface PrintService <<interface>> {
         + itemsFor(PrintJob) : List<LineItem>
     }

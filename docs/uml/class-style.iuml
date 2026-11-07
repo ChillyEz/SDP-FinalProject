@@ -5,8 +5,8 @@ skinparam defaultFontName Arial
 skinparam defaultFontSize 13
 skinparam defaultFontColor #161616
 skinparam shadowing false
-skinparam monochrome true
 skinparam classBackgroundColor #FFFFFF
+skinparam classAttributeIconSize 0
 skinparam classBorderColor #555555
 skinparam arrowColor #555555
 skinparam nodesep 12

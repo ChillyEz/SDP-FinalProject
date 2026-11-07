@@ -1,4 +1,4 @@
-package "Facade" as FacadeGroup {
+package "Facade" as FacadeGroup COLOR_FACADE {
     class PrintCenter {
         - pendingOrders : List<PrintOrder>
         - subscribers : List<PrintSubscriber>
@@ -25,7 +25,7 @@ package "Facade" as FacadeGroup {
     }
 }
 
-package "Strategy" as StrategyGroup {
+package "Strategy" as StrategyGroup COLOR_STRATEGY {
     interface QueuePolicy <<interface>> {
         + selectNext(List<PrintOrder>) : Optional<PrintOrder>
         + name() : String
@@ -42,7 +42,7 @@ package "Strategy" as StrategyGroup {
     }
 }
 
-package "Observer" as ObserverGroup {
+package "Observer" as ObserverGroup COLOR_OBSERVER {
     interface PrintSubscriber <<interface>> {
         + onPrinted(PrintOrder) : void
     }

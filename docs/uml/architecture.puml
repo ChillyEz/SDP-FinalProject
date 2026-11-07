@@ -1,7 +1,7 @@
 @startuml
+!include pattern-colors.iuml
 skinparam backgroundColor white
 skinparam shadowing false
-skinparam monochrome true
 skinparam defaultFontName Arial
 skinparam defaultFontSize 15
 skinparam defaultFontColor #161616
@@ -10,7 +10,7 @@ skinparam arrowColor #555555
 skinparam nodesep 24
 skinparam ranksep 22
 skinparam roundCorner 0
-rectangle B #F5F5F5 [
+rectangle B COLOR_BUILDER [
 <b>Builder</b>
 {{
 !include_many class-style.iuml
@@ -19,25 +19,24 @@ class PrintJob
 Builder .right.> PrintJob : builds
 }}
 ]
-rectangle D #F5F5F5 [
+rectangle D COLOR_DECORATOR [
 <b>Decorator</b>
 {{
 !include_many class-style.iuml
 interface PrintService <<interface>>
-abstract class PrintServiceDecorator
+abstract class PrintServiceDecorator {
+    - wrapped : PrintService
+}
 class BasicPrinting
 class Cover
 class Binding
-class LineItem <<record>>
 PrintService <|.. BasicPrinting
 PrintService <|.. PrintServiceDecorator
-PrintServiceDecorator o-left- PrintService : wraps
 PrintServiceDecorator <|-- Cover
 PrintServiceDecorator <|-- Binding
-PrintService .right.> LineItem
 }}
 ]
-rectangle F #F5F5F5 [
+rectangle F COLOR_FACADE [
 <b>Facade</b>
 {{
 !include_many class-style.iuml
@@ -46,7 +45,7 @@ class ConsolePrinter
 PrintCenter -right-> ConsolePrinter
 }}
 ]
-rectangle S #F5F5F5 [
+rectangle S COLOR_STRATEGY [
 <b>Strategy</b>
 {{
 !include_many class-style.iuml
@@ -57,7 +56,7 @@ QueuePolicy <|.. FirstComeFirstServed
 QueuePolicy <|.. ShortestJobFirst
 }}
 ]
-rectangle O #F5F5F5 [
+rectangle O COLOR_OBSERVER [
 <b>Observer</b>
 {{
 !include_many class-style.iuml
@@ -68,7 +67,7 @@ PrintSubscriber <|.. PrintJournal
 PrintSubscriber <|.. PrintStatistics
 }}
 ]
-rectangle G #F5F5F5 [
+rectangle G COLOR_BRIDGE [
 <b>Bridge</b>
 {{
 !include_many class-style.iuml
@@ -78,17 +77,15 @@ class JobTicket
 interface DocumentRenderer <<interface>>
 class PlainTextRenderer
 class MarkdownRenderer
-class DocumentField <<record>>
 OrderDocument <|-- Receipt
 OrderDocument <|-- JobTicket
 OrderDocument -right-> DocumentRenderer
 DocumentRenderer <|.. PlainTextRenderer
 DocumentRenderer <|.. MarkdownRenderer
-DocumentRenderer ..> DocumentField
 }}
 ]
-rectangle "Main" as Entry #F5F5F5
-rectangle "PrintOrder" as Order #F5F5F5
+rectangle "Main" as Entry COLOR_NEUTRAL
+rectangle "PrintOrder" as Order COLOR_NEUTRAL
 Entry ..> F
 Entry ..> G
 F ..> S : select
