@@ -59,22 +59,3 @@ java -jar lib/junit-platform-console-standalone-1.14.4.jar execute --class-path 
 | Facade | `PrintCenter.printNext()` | Coordinates selection, printing, removal and publication in order. |
 | Observer | `PrintSubscriber` | The journal and page counter subscribe independently to completed prints. |
 | Bridge | `OrderDocument` and `DocumentRenderer` | A receipt and a job ticket can each be issued as plain text or Markdown. |
-
-The [project specification](PROJECT_PLAN.md) gives the business rules. The [report](REPORT.md) includes diagrams and terminal screenshots. Application code lives in `src/` and executable regression checks in `test/`.
-
-## Report and UML
-
-The [pattern overview](docs/uml/architecture.svg) shows how the six patterns cooperate. Each pattern keeps the same color across the diagrams. The [complete implementation class diagram](docs/uml/class-model.svg) shows the fields, constructors, method signatures and structural relationships of all 25 application types. The PDF includes both views, with one A2 landscape sheet for the detailed model. The [document class diagram](docs/uml/document-bridge.svg) and [print sequence](docs/uml/print-next.svg) can also be opened individually. The editable PlantUML sources are in the same directory. To regenerate the SVGs with PlantUML 1.2025.4:
-
-```text
-java -jar plantuml.jar -charset UTF-8 -nometadata -tsvg "docs/uml/*.puml"
-```
-
-The editable report is `REPORT.md`. To rebuild its PDF, use Node.js 22.12+ and a Chromium browser. The report builder includes the screenshots, vector diagrams and complete Java application listing automatically.
-
-```text
-npm --prefix tools/report install --no-package-lock
-node tools/report/build.cjs
-```
-
-The PDF is written to `output/pdf/CampusPrint-Report.pdf`. If the browser is installed outside its usual location, set `CHROME_PATH` to its executable. Report tools are optional for running the Java application.

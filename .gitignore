@@ -1,4 +1,5 @@
 out/
+/output/
 /bin/
 *.class
 node_modules/
