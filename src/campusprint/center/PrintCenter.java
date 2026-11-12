@@ -5,6 +5,7 @@ import campusprint.domain.PrintOrder;
 import campusprint.observer.PrintSubscriber;
 import campusprint.pricing.PrintService;
 import campusprint.queue.FirstComeFirstServed;
+import campusprint.queue.PrintQueue;
 import campusprint.queue.QueuePolicy;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,10 +13,9 @@ import java.util.Objects;
 import java.util.Optional;
 
 public final class PrintCenter {
-    private final List<PrintOrder> pendingOrders = new ArrayList<>();
-    private final List<PrintSubscriber> subscribers = new ArrayList<>();
+    private final PrintQueue queue;
     private final ConsolePrinter printer;
-    private QueuePolicy queuePolicy;
+    private final List<PrintSubscriber> subscribers = new ArrayList<>();
     private int nextOrderId = 1;
 
     public PrintCenter() {
@@ -24,7 +24,7 @@ public final class PrintCenter {
 
     public PrintCenter(ConsolePrinter printer, QueuePolicy initialPolicy) {
         this.printer = Objects.requireNonNull(printer, "printer");
-        this.queuePolicy = Objects.requireNonNull(initialPolicy, "initialPolicy");
+        this.queue = new PrintQueue(initialPolicy);
     }
 
     public void subscribe(PrintSubscriber subscriber) {
@@ -39,49 +39,47 @@ public final class PrintCenter {
     }
 
     public PrintOrder acceptOrder(PrintJob job, PrintService service) {
-        PrintOrder order = new PrintOrder(nextOrderId, job, service);
-        pendingOrders.add(order);
-        nextOrderId++;
+        PrintOrder order = new PrintOrder(nextOrderId++, job, service);
+        queue.add(order);
         return order;
     }
 
     public void setQueuePolicy(QueuePolicy policy) {
-        queuePolicy = Objects.requireNonNull(policy, "policy");
+        queue.setPolicy(policy);
     }
 
     public QueuePolicy queuePolicy() {
-        return queuePolicy;
+        return queue.policy();
     }
 
     public Optional<PrintOrder> peekNext() {
-        return queuePolicy.selectNext(pendingOrders());
+        return queue.peekNext();
     }
 
     public List<PrintOrder> pendingOrders() {
-        return List.copyOf(pendingOrders);
+        return queue.pendingOrders();
+    }
+
+    public void setSimulateFailure(boolean simulateFailure) {
+        printer.setSimulateFailure(simulateFailure);
     }
 
     public Optional<PrintOrder> printNext() {
-        Optional<PrintOrder> next = peekNext();
+        Optional<PrintOrder> next = queue.peekNext();
         if (next.isEmpty()) {
             System.out.println("Queue empty.");
             return next;
         }
         PrintOrder order = next.orElseThrow();
         printer.print(order);
-        pendingOrders.remove(order);
+        queue.remove(order);
         notifySubscribers(order);
         return next;
     }
 
     private void notifySubscribers(PrintOrder order) {
-        // Subscriptions changed during delivery take effect on the next print.
         for (PrintSubscriber subscriber : List.copyOf(subscribers)) {
-            try {
-                subscriber.onPrinted(order);
-            } catch (RuntimeException failure) {
-                System.err.printf("Notification failed for order #%d: %s%n", order.id(), failure.getMessage());
-            }
+            subscriber.onPrinted(order);
         }
     }
 }

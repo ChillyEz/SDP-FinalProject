@@ -1,6 +1,5 @@
 package campusprint;
 
-import campusprint.center.ConsolePrinter;
 import campusprint.center.PrintCenter;
 import campusprint.document.DocumentField;
 import campusprint.document.DocumentRenderer;
@@ -11,7 +10,6 @@ import campusprint.domain.PrintJob;
 import campusprint.domain.PrintOrder;
 import campusprint.observer.PrintJournal;
 import campusprint.observer.PrintStatistics;
-import campusprint.observer.PrintSubscriber;
 import campusprint.pricing.BasicPrinting;
 import campusprint.pricing.Binding;
 import campusprint.pricing.Cover;
@@ -39,7 +37,6 @@ public final class PrintCenterChecks {
         expectFailure(IllegalArgumentException.class, () -> new PrintJob.Builder("Letter", 5).copies(0).build());
         expectFailure(IllegalArgumentException.class, () -> new PrintJob.Builder("Letter", 5).range(3, 2).build());
         expectFailure(IllegalArgumentException.class, () -> new PrintJob.Builder("Letter", 5).range(1, 6).build());
-        expectFailure(IllegalArgumentException.class, () -> new PrintJob.Builder("Batch", 65_536).copies(65_536).build());
         expectFailure(IllegalArgumentException.class, () -> new Cover(new Binding(new Cover(new BasicPrinting()))));
 
         PrintJob job = new PrintJob.Builder("Booklet", 5).range(2, 5).copies(3).build();
@@ -50,19 +47,11 @@ public final class PrintCenterChecks {
         check(order.totalCost() == 1_140 && order.items().size() == 3, "Repeatable quote");
         PrintOrder onePage = accept(new PrintCenter(), "Letter", 1);
         check(onePage.summary().equals("#1 Letter (1 page)"), "Single-page order summary");
-
-        PrintJob batch = new PrintJob.Builder("Batch", 1).copies(Integer.MAX_VALUE).build();
-        PrintOrder maximum = new PrintOrder(2, batch, new Cover(new Binding(new BasicPrinting())));
-        check(maximum.totalCost() == 320L * Integer.MAX_VALUE, "64-bit charge total");
-        PrintStatistics statistics = new PrintStatistics();
-        statistics.onPrinted(maximum);
-        statistics.onPrinted(order);
-        check(statistics.totalPrintedPages() == (long) Integer.MAX_VALUE + 12, "64-bit cumulative pages");
     }
 
     static void checkSchedulingAndRetry() {
-        ConsolePrinter printer = new ConsolePrinter();
-        PrintCenter center = new PrintCenter(printer, new ShortestJobFirst());
+        PrintCenter center = new PrintCenter();
+        center.setQueuePolicy(new ShortestJobFirst());
         PrintJournal journal = new PrintJournal();
         PrintStatistics statistics = new PrintStatistics();
         center.subscribe(journal);
@@ -72,11 +61,11 @@ public final class PrintCenterChecks {
         check(center.peekNext().orElseThrow() == older, "Earlier arrival wins a tie");
         check(center.pendingOrders().equals(List.of(older, newer)), "Preview preserves the queue");
 
-        printer.setSimulateFailure(true);
+        center.setSimulateFailure(true);
         expectFailure(IllegalStateException.class, center::printNext);
         check(center.pendingOrders().equals(List.of(older, newer)), "Jam preserves both orders");
         check(journal.entries().isEmpty() && statistics.completedOrders() == 0, "Jam produces no completion");
-        printer.setSimulateFailure(false);
+        center.setSimulateFailure(false);
         check(center.printNext().orElseThrow() == older, "Retry prints the pending order");
         check(center.printNext().orElseThrow() == newer, "Next order prints once");
         check(center.printNext().isEmpty(), "Empty queue");
@@ -86,23 +75,19 @@ public final class PrintCenterChecks {
 
     static void checkSubscriptionChanges() {
         PrintCenter center = new PrintCenter();
-        PrintJournal joinedLater = new PrintJournal();
+        PrintJournal journal = new PrintJournal();
         PrintStatistics statistics = new PrintStatistics();
-        center.subscribe(new PrintSubscriber() {
-            @Override
-            public void onPrinted(PrintOrder order) {
-                center.unsubscribe(this);
-                center.subscribe(joinedLater);
-            }
-        });
+        center.subscribe(journal);
         center.subscribe(statistics);
         center.subscribe(statistics);
         accept(center, "First", 1);
         accept(center, "Second", 2);
         center.printNext();
+        center.unsubscribe(statistics);
         center.printNext();
-        check(statistics.completedOrders() == 2, "Self-unsubscribe preserves the other subscription");
-        check(joinedLater.entries().equals(List.of("#2 Second")), "New subscription starts with the next event");
+        check(journal.entries().equals(List.of("#1 First", "#2 Second")), "Journal records both prints");
+        check(statistics.completedOrders() == 1 && statistics.totalPrintedPages() == 1,
+                "Unsubscribed observer stops receiving completions");
     }
 
     static void checkDocumentBridge() {

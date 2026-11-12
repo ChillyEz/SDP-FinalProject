@@ -1,6 +1,5 @@
 package campusprint.ui;
 
-import campusprint.center.ConsolePrinter;
 import campusprint.center.PrintCenter;
 import campusprint.domain.PrintJob;
 import campusprint.domain.PrintOrder;
@@ -12,19 +11,18 @@ import campusprint.pricing.Cover;
 import campusprint.pricing.PrintService;
 import campusprint.queue.FirstComeFirstServed;
 import campusprint.queue.ShortestJobFirst;
+import java.util.Optional;
 
 public final class PrintDeskController {
     private final PrintDeskWindow view;
-    private final ConsolePrinter printer = new ConsolePrinter();
-    private final PrintCenter center = new PrintCenter(printer, new FirstComeFirstServed());
+    private final PrintCenter center = new PrintCenter();
+    private final PrintJournal journal = new PrintJournal();
+    private final PrintStatistics statistics = new PrintStatistics();
 
     public PrintDeskController(PrintDeskWindow view) {
         this.view = view;
-        PrintJournal journal = new PrintJournal();
-        PrintStatistics statistics = new PrintStatistics();
         center.subscribe(journal);
         center.subscribe(statistics);
-        center.subscribe(new PrintViewObserver(view, journal, statistics));
         view.bind(this);
         refreshQueue();
     }
@@ -52,12 +50,14 @@ public final class PrintDeskController {
     }
 
     public void printNext() {
-        center.printNext();
+        Optional<PrintOrder> printed = center.printNext();
         refreshQueue();
+        printed.ifPresent(order ->
+                view.showCompletion(order, journal.entries(), statistics.summary()));
     }
 
     public void simulateFailure(boolean enabled) {
-        printer.setSimulateFailure(enabled);
+        center.setSimulateFailure(enabled);
         view.setStatus(enabled ? "Paper jam enabled. Printing will fail." : "Printer ready.");
     }
 

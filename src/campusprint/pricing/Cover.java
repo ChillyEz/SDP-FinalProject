@@ -11,7 +11,7 @@ public final class Cover extends PrintServiceDecorator {
     }
 
     @Override
-    protected long costFor(PrintJob job) {
-        return (long) job.copies() * PRICE_PER_COPY;
+    protected int costFor(PrintJob job) {
+        return job.copies() * PRICE_PER_COPY;
     }
 }

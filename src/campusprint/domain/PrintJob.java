@@ -77,9 +77,6 @@ public final class PrintJob {
             if (fromPage < 1 || toPage < fromPage || toPage > totalPages) {
                 throw new IllegalArgumentException("Select a range within pages 1-" + totalPages + ".");
             }
-            if ((long) (toPage - fromPage + 1) * copies > Integer.MAX_VALUE) {
-                throw new IllegalArgumentException("Print volume exceeds the per-job page limit.");
-            }
             return new PrintJob(this);
         }
     }

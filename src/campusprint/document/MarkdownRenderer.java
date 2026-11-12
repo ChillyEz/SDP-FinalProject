@@ -15,9 +15,6 @@ public final class MarkdownRenderer implements DocumentRenderer {
     }
 
     private static String escape(String text) {
-        return text.replace("\\", "\\\\").replace("|", "\\|").replaceAll("\\R", " ")
-                .replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-                .replace("*", "\\*").replace("_", "\\_").replace("`", "\\`")
-                .replace("[", "\\[").replace("]", "\\]").replace("~", "\\~");
+        return text.replace("|", "\\|").replaceAll("\\R", " ");
     }
 }

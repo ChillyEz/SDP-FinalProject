@@ -125,6 +125,17 @@ public final class PrintDeskWindow {
 
     public void showDocument(PrintOrder order, String state) {
         documentOrder = order;
+        int row = pending.indexOf(order);
+        refreshingQueue = true;
+        try {
+            if (row >= 0) {
+                queue.setRowSelectionInterval(row, row);
+            } else {
+                queue.clearSelection();
+            }
+        } finally {
+            refreshingQueue = false;
+        }
         documentTitle.setText(state + " order #" + order.id() + " / " + order.job().documentName());
         renderDocument();
     }
@@ -222,7 +233,7 @@ public final class PrintDeskWindow {
     }
 
     private static JSpinner number(int value) {
-        return new JSpinner(new SpinnerNumberModel(value, 1, Integer.MAX_VALUE, 1));
+        return new JSpinner(new SpinnerNumberModel(value, Integer.MIN_VALUE, Integer.MAX_VALUE, 1));
     }
 
     private static JTextArea outputArea() {

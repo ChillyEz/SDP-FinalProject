@@ -60,7 +60,7 @@ java -jar lib/junit-platform-console-standalone-1.14.4.jar execute --class-path 
 | --- | --- | --- |
 | Builder | `PrintJob.Builder` | Validates the range, copy count and print volume before acceptance. |
 | Decorator | `BasicPrinting`, `Cover`, `Binding` | The selected finishing services supply both charges and production instructions. |
-| Strategy | `QueuePolicy` | FIFO and shortest job first select from the same arrival-ordered queue. |
-| Facade | `PrintCenter.printNext()` | Coordinates selection, printing, removal and publication in order. |
-| Observer | `PrintSubscriber` | The journal, page counter and `PrintViewObserver` react to completed prints. The view refresh runs on Swing's event thread after subscribers process the event. |
+| Strategy | `PrintQueue`, `QueuePolicy` | FIFO and shortest job first select from the same arrival-ordered queue. |
+| Facade | `PrintCenter` | Coordinates queue selection, printing, removal and publication in order. |
+| Observer | `PrintSubscriber`, `PrintJournal`, `PrintStatistics` | Independent subscribers record completed orders and printed page totals after each print. |
 | Bridge | `OrderDocument` and `DocumentRenderer` | The document and format selectors independently choose a receipt or ticket and plain text or Markdown. |
