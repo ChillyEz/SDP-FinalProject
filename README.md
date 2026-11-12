@@ -2,7 +2,8 @@
 
 CampusPrint is a Java simulation of a university print desk with a Swing interface. Enter orders, compare queue policies, print the next job, and inspect its receipt or job ticket.
 
-**Software Design Patterns · Amir Baiseitov · SE-2505**
+**Software Design Patterns · Amir Baiseitov · SE-2505**  
+**GitHub Repository:** [https://github.com/ChillyEz/SDP-FinalProject](https://github.com/ChillyEz/SDP-FinalProject)
 
 ## Build and run
 
