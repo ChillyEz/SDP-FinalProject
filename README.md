@@ -1,6 +1,6 @@
 # CampusPrint
 
-CampusPrint is a Java console simulation of a university print desk. Compare queue policies on the same orders, print a job, and render the receipt and operator's ticket in two formats.
+CampusPrint is a Java simulation of a university print desk with a Swing interface. Enter orders, compare queue policies, print the next job, and inspect its receipt or job ticket.
 
 **Software Design Patterns · Amir Baiseitov · SE-2505**
 
@@ -11,8 +11,8 @@ Use JDK 17 or later. The project root is the folder containing `src`, `test` and
 ### VS Code
 
 1. Use **File > Open Folder** to open the project root. With the **Extension Pack for Java** installed, wait for **Java: Ready** in the status bar.
-2. In **Run and Debug**, select **CampusPrint** and press **Ctrl+F5**. You can also open `src/campusprint/Main.java` and use **Run Java** or Code Runner's **Run Code** button.
-3. For a different copy count, select **CampusPrint (choose copies)** in **Run and Debug**, press **Ctrl+F5** and enter a positive integer.
+2. In **Run and Debug**, select **CampusPrint** and press **Ctrl+F5**. You can also open `src/campusprint/DesktopMain.java` and use **Run Java** or Code Runner's **Run Code** button.
+3. In the window, enter the document length, page range and copies. Select finishing services and press **Add order**. Change the queue policy to see the next order. **Print next** updates the journal, counters and completed-order document. Select a queued row to preview its documents. **Simulate paper jam** lets you check failure and retry.
 4. Open **Testing** (the beaker icon) and select **Run Tests**. Expand the project and `PrintCenterTest` to run any of the six tests individually. **Refresh Tests** updates the list after the folder opens.
 
 ### Terminal
@@ -20,13 +20,18 @@ Use JDK 17 or later. The project root is the folder containing `src`, `test` and
 Run these commands in PowerShell or Bash from the project root.
 
 ```text
-javac --release 17 -encoding UTF-8 -d out -sourcepath src src/campusprint/Main.java
-java -cp out campusprint.Main
+javac --release 17 -encoding UTF-8 -d out -sourcepath src src/campusprint/DesktopMain.java
+java -cp out campusprint.DesktopMain
 ```
 
-`javac` writes the compiled classes to `out`. In the second command, `-cp out` tells Java where to find those classes and `campusprint.Main` is the package-qualified entry point. The optional number after the class name sets the application's copy count in the final, fresh queue. The initial run always prints the same two orders, totaling 84 pages.
+`javac` writes the compiled classes to `out`. In the second command, `-cp out` tells Java where to find those classes. The desktop interface starts with an empty queue.
+
+### Console demonstration
+
+The **CampusPrint (console demo)** launch profile runs the scripted example. **CampusPrint (choose copies)** prompts for the comparison copy count. These can also run from the terminal.
 
 ```text
+javac --release 17 -encoding UTF-8 -d out -sourcepath src src/campusprint/Main.java
 java -cp out campusprint.Main 39
 java -cp out campusprint.Main 40
 ```
@@ -35,10 +40,10 @@ Each application copy contains pages 2 and 3. At 39 copies the 78-page applicati
 
 ### Regression checks
 
-After compiling the application above, the same six checks can run directly on the JDK.
+The six core checks can run directly on the JDK.
 
 ```text
-javac --release 17 -encoding UTF-8 -cp out -d out test/campusprint/PrintCenterChecks.java
+javac --release 17 -encoding UTF-8 -sourcepath src -d out test/campusprint/PrintCenterChecks.java
 java -cp out campusprint.PrintCenterChecks
 ```
 
@@ -57,5 +62,5 @@ java -jar lib/junit-platform-console-standalone-1.14.4.jar execute --class-path 
 | Decorator | `BasicPrinting`, `Cover`, `Binding` | The selected finishing services supply both charges and production instructions. |
 | Strategy | `QueuePolicy` | FIFO and shortest job first select from the same arrival-ordered queue. |
 | Facade | `PrintCenter.printNext()` | Coordinates selection, printing, removal and publication in order. |
-| Observer | `PrintSubscriber` | The journal and page counter subscribe independently to completed prints. |
-| Bridge | `OrderDocument` and `DocumentRenderer` | A receipt and a job ticket can each be issued as plain text or Markdown. |
+| Observer | `PrintSubscriber` | The journal, page counter and `PrintViewObserver` react to completed prints. The view refresh runs on Swing's event thread after subscribers process the event. |
+| Bridge | `OrderDocument` and `DocumentRenderer` | The document and format selectors independently choose a receipt or ticket and plain text or Markdown. |

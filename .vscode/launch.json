@@ -5,6 +5,13 @@
             "name": "CampusPrint",
             "type": "java",
             "request": "launch",
+            "mainClass": "campusprint.DesktopMain",
+            "console": "internalConsole"
+        },
+        {
+            "name": "CampusPrint (console demo)",
+            "type": "java",
+            "request": "launch",
             "mainClass": "campusprint.Main",
             "console": "integratedTerminal"
         },
