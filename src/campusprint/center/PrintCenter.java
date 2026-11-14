@@ -78,8 +78,13 @@ public final class PrintCenter {
     }
 
     private void notifySubscribers(PrintOrder order) {
+        // Subscriptions changed during delivery take effect on the next print.
         for (PrintSubscriber subscriber : List.copyOf(subscribers)) {
-            subscriber.onPrinted(order);
+            try {
+                subscriber.onPrinted(order);
+            } catch (RuntimeException failure) {
+                System.err.printf("Notification failed for order #%d: %s%n", order.id(), failure.getMessage());
+            }
         }
     }
 }

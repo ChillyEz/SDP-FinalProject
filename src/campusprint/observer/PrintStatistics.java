@@ -4,7 +4,7 @@ import campusprint.domain.PrintOrder;
 
 public final class PrintStatistics implements PrintSubscriber {
     private int completedOrders;
-    private int totalPrintedPages;
+    private long totalPrintedPages;
 
     @Override
     public void onPrinted(PrintOrder order) {
@@ -16,7 +16,7 @@ public final class PrintStatistics implements PrintSubscriber {
         return completedOrders;
     }
 
-    public int totalPrintedPages() {
+    public long totalPrintedPages() {
         return totalPrintedPages;
     }
 
