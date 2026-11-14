@@ -21,7 +21,7 @@ public abstract class PrintServiceDecorator implements PrintService {
         }
     }
 
-    protected abstract int costFor(PrintJob job);
+    protected abstract long costFor(PrintJob job);
 
     @Override
     public final List<LineItem> itemsFor(PrintJob job) {

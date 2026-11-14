@@ -9,6 +9,6 @@ public final class BasicPrinting implements PrintService {
 
     @Override
     public List<LineItem> itemsFor(PrintJob job) {
-        return List.of(new LineItem(SERVICE_NAME, job.printedPages() * PRICE_PER_PAGE));
+        return List.of(new LineItem(SERVICE_NAME, (long) job.printedPages() * PRICE_PER_PAGE));
     }
 }

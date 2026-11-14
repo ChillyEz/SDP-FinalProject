@@ -44,8 +44,8 @@ public final class PrintOrder {
         return List.copyOf(service.itemsFor(job));
     }
 
-    public int totalCost() {
-        return items().stream().mapToInt(LineItem::amount).sum();
+    public long totalCost() {
+        return items().stream().mapToLong(LineItem::amount).sum();
     }
 
     @Override
