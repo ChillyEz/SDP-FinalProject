@@ -17,12 +17,17 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.text.ParseException;
 import java.util.List;
+import java.util.function.Function;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
 public final class PrintDeskWindow {
     private static final List<QueuePolicy> POLICIES =
             List.of(new FirstComeFirstServed(), new ShortestJobFirst());
+    private static final List<Function<DocumentRenderer, OrderDocument>> DOCUMENTS =
+            List.of(Receipt::new, JobTicket::new);
+    private static final List<DocumentRenderer> RENDERERS =
+            List.of(new PlainTextRenderer(), new MarkdownRenderer());
     private final JFrame frame = new JFrame("CampusPrint");
     private final JTextField name = new JTextField("Thesis");
     private final JSpinner pages = number(80);
@@ -161,10 +166,8 @@ public final class PrintDeskWindow {
         if (documentOrder == null) {
             return;
         }
-        DocumentRenderer renderer = format.getSelectedIndex() == 0
-                ? new PlainTextRenderer() : new MarkdownRenderer();
-        OrderDocument selected = documentType.getSelectedIndex() == 0
-                ? new Receipt(renderer) : new JobTicket(renderer);
+        DocumentRenderer renderer = RENDERERS.get(format.getSelectedIndex());
+        OrderDocument selected = DOCUMENTS.get(documentType.getSelectedIndex()).apply(renderer);
         document.setText(selected.render(documentOrder));
         document.setCaretPosition(0);
     }
