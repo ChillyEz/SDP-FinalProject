@@ -8,6 +8,9 @@ import campusprint.document.PlainTextRenderer;
 import campusprint.document.Receipt;
 import campusprint.domain.PrintOrder;
 import campusprint.pricing.LineItem;
+import campusprint.queue.FirstComeFirstServed;
+import campusprint.queue.QueuePolicy;
+import campusprint.queue.ShortestJobFirst;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -18,6 +21,8 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
 public final class PrintDeskWindow {
+    private static final List<QueuePolicy> POLICIES =
+            List.of(new FirstComeFirstServed(), new ShortestJobFirst());
     private final JFrame frame = new JFrame("CampusPrint");
     private final JTextField name = new JTextField("Thesis");
     private final JSpinner pages = number(80);
@@ -30,7 +35,7 @@ public final class PrintDeskWindow {
     private final JButton print = new JButton("Print next");
     private final JCheckBox jam = new JCheckBox("Simulate paper jam");
     private final JComboBox<String> policy = new JComboBox<>(
-            new String[] {"First come, first served", "Shortest job first"});
+            POLICIES.stream().map(QueuePolicy::name).toArray(String[]::new));
     private final JComboBox<String> documentType = new JComboBox<>(new String[] {"Receipt", "Job ticket"});
     private final JComboBox<String> format = new JComboBox<>(new String[] {"Plain text", "Markdown"});
     private final JLabel nextOrder = new JLabel("Queue empty.");
@@ -75,6 +80,7 @@ public final class PrintDeskWindow {
                 showDocument(pending.get(row), "Pending");
             }
         });
+        pages.addChangeListener(event -> to.setValue(pages.getValue()));
         documentType.addActionListener(event -> renderDocument());
         format.addActionListener(event -> renderDocument());
     }
@@ -92,7 +98,7 @@ public final class PrintDeskWindow {
                     (int) to.getValue(), (int) copies.getValue(), cover.isSelected(), binding.isSelected());
         }));
         print.addActionListener(event -> perform(controller::printNext));
-        policy.addActionListener(event -> controller.changePolicy(policy.getSelectedIndex() == 1));
+        policy.addActionListener(event -> controller.changePolicy(POLICIES.get(policy.getSelectedIndex())));
         jam.addActionListener(event -> controller.simulateFailure(jam.isSelected()));
     }
 

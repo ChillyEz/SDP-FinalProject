@@ -9,8 +9,7 @@ import campusprint.pricing.BasicPrinting;
 import campusprint.pricing.Binding;
 import campusprint.pricing.Cover;
 import campusprint.pricing.PrintService;
-import campusprint.queue.FirstComeFirstServed;
-import campusprint.queue.ShortestJobFirst;
+import campusprint.queue.QueuePolicy;
 import java.util.Optional;
 
 public final class PrintDeskController {
@@ -43,8 +42,8 @@ public final class PrintDeskController {
         view.setStatus("Order #" + order.id() + " added to the queue.");
     }
 
-    public void changePolicy(boolean shortestFirst) {
-        center.setQueuePolicy(shortestFirst ? new ShortestJobFirst() : new FirstComeFirstServed());
+    public void changePolicy(QueuePolicy policy) {
+        center.setQueuePolicy(policy);
         refreshQueue();
         view.setStatus("Queue policy changed to " + center.queuePolicy().name() + ".");
     }

@@ -2,12 +2,12 @@ package campusprint.center;
 
 import campusprint.domain.PrintJob;
 import campusprint.domain.PrintOrder;
+import campusprint.observer.PrintPublisher;
 import campusprint.observer.PrintSubscriber;
 import campusprint.pricing.PrintService;
 import campusprint.queue.FirstComeFirstServed;
 import campusprint.queue.PrintQueue;
 import campusprint.queue.QueuePolicy;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -15,7 +15,7 @@ import java.util.Optional;
 public final class PrintCenter {
     private final PrintQueue queue;
     private final ConsolePrinter printer;
-    private final List<PrintSubscriber> subscribers = new ArrayList<>();
+    private final PrintPublisher publisher = new PrintPublisher();
     private int nextOrderId = 1;
 
     public PrintCenter() {
@@ -28,14 +28,11 @@ public final class PrintCenter {
     }
 
     public void subscribe(PrintSubscriber subscriber) {
-        Objects.requireNonNull(subscriber, "subscriber");
-        if (!subscribers.contains(subscriber)) {
-            subscribers.add(subscriber);
-        }
+        publisher.subscribe(subscriber);
     }
 
     public void unsubscribe(PrintSubscriber subscriber) {
-        subscribers.remove(subscriber);
+        publisher.unsubscribe(subscriber);
     }
 
     public PrintOrder acceptOrder(PrintJob job, PrintService service) {
@@ -73,18 +70,7 @@ public final class PrintCenter {
         PrintOrder order = next.orElseThrow();
         printer.print(order);
         queue.remove(order);
-        notifySubscribers(order);
+        publisher.publish(order);
         return next;
-    }
-
-    private void notifySubscribers(PrintOrder order) {
-        // Subscriptions changed during delivery take effect on the next print.
-        for (PrintSubscriber subscriber : List.copyOf(subscribers)) {
-            try {
-                subscriber.onPrinted(order);
-            } catch (RuntimeException failure) {
-                System.err.printf("Notification failed for order #%d: %s%n", order.id(), failure.getMessage());
-            }
-        }
     }
 }

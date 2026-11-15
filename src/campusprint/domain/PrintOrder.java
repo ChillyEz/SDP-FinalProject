@@ -27,10 +27,6 @@ public final class PrintOrder {
         return job;
     }
 
-    public PrintService service() {
-        return service;
-    }
-
     public int printedPages() {
         return job.printedPages();
     }
